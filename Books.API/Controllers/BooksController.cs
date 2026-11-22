@@ -71,5 +71,97 @@ namespace Books.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new CommandResponse(false, "An exception occured during BooksGetById.")); 
             }
         }
+
+		// POST: api/Books
+        [HttpPost]
+        public async Task<IActionResult> Post(BookAddRequest request)
+        {
+            try
+            {
+                // Check if the request model is valid through data annotations
+                if (ModelState.IsValid)
+                {
+                    // Send the create request
+                    var response = await _mediator.Send(request);
+                    // If creation is successful, return 200 OK with success command response
+                    if (response.IsSuccessful)
+                    {
+                        //return CreatedAtAction(nameof(Get), new { id = response.Id }, response);
+                        return Ok(response);
+                    }
+                    // If creation failed, add error command response message to model state
+                    ModelState.AddModelError("BooksPost", response.Message);
+                }
+                // Return 400 Bad Request with all data annotation validation error messages and the error command response message if added seperated by |
+                return BadRequest(new CommandResponse(false, string.Join("|", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))));
+            }
+            catch (Exception exception)
+            {
+                // Log the exception
+                _logger.LogError("BooksPost Exception: " + exception.Message);
+                // Return 500 Internal Server Error with an error command response with message
+                return StatusCode(StatusCodes.Status500InternalServerError, new CommandResponse(false, "An exception occured during BooksPost.")); 
+            }
+        }
+
+        // PUT: api/Books
+        [HttpPut]
+        public async Task<IActionResult> Put(BookUpdateRequest request)
+        {
+            try
+            {
+                // Check if the request model is valid through data annotations
+                if (ModelState.IsValid)
+                {
+                    // Send the update request
+                    var response = await _mediator.Send(request);
+                    // If update is successful, return 200 OK with success command response
+                    if (response.IsSuccessful)
+                    {
+                        //return NoContent();
+                        return Ok(response);
+                    }
+                    // If update failed, add error command response message to model state
+                    ModelState.AddModelError("BooksPut", response.Message);
+                }
+                // Return 400 Bad Request with all data annotation validation error messages and the error command response message if added seperated by |
+                return BadRequest(new CommandResponse(false, string.Join("|", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))));
+            }
+            catch (Exception exception)
+            {
+                // Log the exception
+                _logger.LogError("BooksPut Exception: " + exception.Message);
+                // Return 500 Internal Server Error with an error command response with message
+                return StatusCode(StatusCodes.Status500InternalServerError, new CommandResponse(false, "An exception occured during BooksPut.")); 
+            }
+        }
+
+        // DELETE: api/Books/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                // Send the delete request
+                var response = await _mediator.Send(new BookRemoveRequest() { Id = id });
+                // If delete is successful, return 200 OK with success command response
+                if (response.IsSuccessful)
+                {
+                    //return NoContent();
+                    return Ok(response);
+                }
+                // If delete failed, add error command response message to model state
+                ModelState.AddModelError("BooksDelete", response.Message);
+                // Return 400 Bad Request with the error command response message
+                return BadRequest(new CommandResponse(false, string.Join("|", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage))));
+            }
+            catch (Exception exception)
+            {
+                // Log the exception
+                _logger.LogError("BooksDelete Exception: " + exception.Message);
+                // Return 500 Internal Server Error with an error command response with message
+                return StatusCode(StatusCodes.Status500InternalServerError, new CommandResponse(false, "An exception occured during BooksDelete.")); 
+            }
+        }
 	}
 }
