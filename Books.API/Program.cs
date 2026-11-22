@@ -7,6 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<DbContext, BooksDb>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString(nameof(BooksDb))
 ));
+foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+{
+    builder.Services.AddMediatR(
+        config => config.RegisterServicesFromAssemblies(assembly));
+}
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
